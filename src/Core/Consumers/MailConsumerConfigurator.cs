@@ -23,6 +23,10 @@ namespace MailMan.Core.Consumers
         }
         public MailConsumerConfigurator<TInput, TOutput> WithHandler(Func<TInput, TOutput> handler)
         {
+            // Confesso que no momento isso não está legal.
+            // O Ideal MESMO seria separar de alguma maneira para que haja handlers async e não async,
+            // a fim de não sair criando contexto caso seja utilizado um carteiro simples sem métodos async.
+            //TODO: Ajustar
             Handler = new Func<TInput, Task<TOutput>>(input => Task.FromResult(handler(input)));
             return this;
         }

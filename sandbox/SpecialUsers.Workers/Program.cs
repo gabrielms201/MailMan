@@ -25,7 +25,8 @@ public static class Program
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
-        services.AddMailMan(opt => opt.HavingDefaultConsumerConfiguration(configuration.GetValue<MailConsumerConfig>("MailMan.ConsumerConfig")!)
+        var mailManConfig = configuration.GetSection("MailMan.ConsumerConfig").Get<MailConsumerConfig>();
+        services.AddMailMan(opt => opt.HavingDefaultConsumerConfiguration(mailManConfig!)
                 .AddDeliver<WikiAccount, SpecialUser>(consumerA => consumerA
                     .ConsumingKafkaTopic("wiki-information-accounts")
                     .HavingConsumerGroup("special-users-workers")
