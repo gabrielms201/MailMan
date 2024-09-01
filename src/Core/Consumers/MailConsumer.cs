@@ -5,7 +5,10 @@ namespace MailMan.Core.Consumers
     public interface IMailConsumer
     {
         //TODO: Validar se é possível remover o object, e deixar como generics
-        public Task ExecuteAsync(object input);
+        public Task ExecuteAsync(object input, CancellationToken cancellationToken);
+        public MailConsumerConfig GetConsumerConfig();
+        public string GetTopic();
+        public Type GetInputType();
     }
     public class MailConsumer<TInput, TOutput> : IMailConsumer
     {
@@ -26,18 +29,21 @@ namespace MailMan.Core.Consumers
             //TODO: Criar validador de config
             Topic = topic;
             ConsumerGroup = consumerGroup;
-            Handler = handler;
             ConsumerConfig = consumerConfig;
+            ConsumerConfig.KafkaConfig.GroupId = ConsumerGroup;
+            Handler = handler;
 
             producer ??= MailProducer<TOutput>.Empty;
             Producer = producer;
         }
 
-        public async Task ExecuteAsync(object input)
+        public async Task ExecuteAsync(object input, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (input is not TInput)
             {
-                throw new ArgumentException($"Input type is not {typeof(TInput)}");
+                return;
             }
 
             var output = await Handler.Invoke((TInput)input);
@@ -46,8 +52,14 @@ namespace MailMan.Core.Consumers
             {
                 //TODO: Logar caso dê algo errado.
                 //TODO: Logar caso outptu seja nulo
-                await Producer.ProduceAsync(output);
+                await Producer.ProduceAsync(output, cancellationToken);
             }
         }
+
+        public MailConsumerConfig GetConsumerConfig() => ConsumerConfig;
+
+        public string GetTopic() => Topic;
+
+        public Type GetInputType() => typeof(TInput);
     }
 }

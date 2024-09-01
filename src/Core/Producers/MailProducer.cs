@@ -2,7 +2,7 @@
 {
     public interface IMailProducer<TOutput>
     {
-        public Task ProduceAsync(TOutput output);
+        public Task ProduceAsync(TOutput output, CancellationToken cancellationToken);
     }
     public class MailProducer<TOutput> : IMailProducer<TOutput>
     {
@@ -16,8 +16,10 @@
         public bool IsNullOrEmpty => ReferenceEquals(this, Empty) || this is null;
         public MailProducerConfig Config { get; private set; } = MailProducerConfig.Empty;
 
-        public async Task ProduceAsync(TOutput output)
+        public async Task ProduceAsync(TOutput output, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             await Task.Delay(1);
             throw new NotImplementedException();
         }

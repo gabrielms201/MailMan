@@ -18,6 +18,7 @@ namespace MailMan.Core.Consumers
 
         public MailConsumerConfigurator<TInput, TOutput> HavingConsumerGroup(string consumerGroup)
         {
+            //TODO: melhorar para config user consumer group
             ConsumerGroup = consumerGroup;
             return this;
         }

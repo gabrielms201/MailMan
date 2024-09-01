@@ -1,6 +1,5 @@
 namespace SpecialUsers.Workers;
 
-using Confluent.Kafka;
 using MailMan.Core.Consumers;
 using MailMan.Installers.Extensions.DependencyInjection;
 using SpecialUsers.Workers.Contracts;
@@ -34,9 +33,8 @@ public static class Program
                     )
                 .AddDeliver<ForumAccount, SpecialUser>(consumerB => consumerB
                     .ConsumingKafkaTopic("forum-information-accounts")
-                    .HavingConsumerGroup("special-users-workers")
-                        .WithHandler(AsyncHandler),
-                kafkaConsumerConfig: MailConsumerConfig.FromConfluentConfig(new ConsumerConfig { AllowAutoCreateTopics = true })
+                    .HavingConsumerGroup("special-users-workers-forum")
+                        .WithHandler(AsyncHandler)
             )
         );
     }

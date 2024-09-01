@@ -5,7 +5,7 @@ namespace MailMan.Core.Configurator
 {
     public interface IMailConfigurator
     {
-
+        public ConcurrentBag<IMailConsumer> GetConsumers();
     }
     public class MailConfigurator : IMailConfigurator
     {
@@ -34,5 +34,7 @@ namespace MailMan.Core.Configurator
             return this;
 
         }
+
+        public ConcurrentBag<IMailConsumer> GetConsumers() => _consumers;
     }
 }
