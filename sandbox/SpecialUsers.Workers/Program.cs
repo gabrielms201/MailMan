@@ -34,7 +34,7 @@ public static class Program
                     )
                 .AddDeliver<ForumAccount, SpecialUser>(consumerB => consumerB
                     .ConsumingKafkaTopic("forum-information-accounts")
-                    .HavingConsumerGroup("special-users-workers-forum")
+                    .HavingConsumerGroup("special-users-workers")
                     .WithHandler(AsyncHandler)
                     .ProducingToKafkaTopic("output-special-users")
             )

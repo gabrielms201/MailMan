@@ -3,7 +3,7 @@ PRODUCER
 topic:forum-information-accounts
 key: 1234
 {
-    "Name" : "John3_forum",
+    "Name" : "John32_wikiforum",
     "Email": "John@gmail.com",
     "ForumName": "john_name_forum",
     "WikiName": "john_name2"

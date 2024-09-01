@@ -2,7 +2,6 @@
 using MailMan.Core.Configurator;
 using MailMan.Core.Consumers;
 using System.Collections.Concurrent;
-using System.Text.Json;
 
 namespace MailMan.Core.Manager
 {
@@ -54,10 +53,9 @@ namespace MailMan.Core.Manager
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     var message = kafkaConsumer.Consume(cancellationToken);
-                    //TODO: Arrumar essa conversao horrivel de json
-                    var messageAsObj = JsonSerializer.Deserialize(message.Message.Value, inputType);
 
-                    await mailConsumer.ExecuteAsync(messageAsObj, cancellationToken);
+                    //TODO: Adicionar suporte a open telemetry
+                    await mailConsumer.ExecuteAsync(message.Message.Value, cancellationToken);
                 }
                 catch (Exception ex)
                 {

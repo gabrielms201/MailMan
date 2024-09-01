@@ -1,11 +1,12 @@
 ﻿using MailMan.Core.Producers;
+using System.Text.Json;
 
 namespace MailMan.Core.Consumers
 {
     public interface IMailConsumer
     {
         //TODO: Validar se é possível remover o object, e deixar como generics
-        public Task ExecuteAsync(object input, CancellationToken cancellationToken);
+        public Task ExecuteAsync(string input, CancellationToken cancellationToken);
         public MailConsumerConfig GetConsumerConfig();
         public string GetTopic();
         public Type GetInputType();
@@ -37,18 +38,19 @@ namespace MailMan.Core.Consumers
             Producer = producer;
         }
 
-        public async Task ExecuteAsync(object input, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(string inputJson, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            var input = JsonSerializer.Deserialize<TInput>(inputJson);
 
             if (input is not TInput)
             {
                 return;
             }
 
-            var output = await Handler.Invoke((TInput)input);
+            var output = await Handler.Invoke(input);
 
-            if (!Producer.IsNullOrEmpty && output is not null)
+            if (!Producer.IsEmpty && output is not null)
             {
                 //TODO: Logar caso dê algo errado.
                 //TODO: Logar caso outptu seja nulo

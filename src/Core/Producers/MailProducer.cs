@@ -18,7 +18,7 @@ namespace MailMan.Core.Producers
         }
 
         public static MailProducer<TOutput> Empty => new();
-        public bool IsNullOrEmpty => ReferenceEquals(this, Empty) || this is null;
+        public bool IsEmpty => ReferenceEquals(this, Empty);
         public MailProducerConfig Config { get; private set; } = MailProducerConfig.Empty;
 
         public async Task ProduceAsync(TOutput output, CancellationToken cancellationToken)
