@@ -40,11 +40,10 @@ namespace MailMan.Core.Manager
 
         public static async Task StartConsumerThreadAsync(IMailConsumer mailConsumer, CancellationToken cancellationToken)
         {
-            var inputType = mailConsumer.GetInputType();
             var config = mailConsumer.GetConsumerConfig().KafkaConfig;
             var topic = mailConsumer.GetTopic();
 
-            using var kafkaConsumer = new ConsumerBuilder<string, string>(config).Build();
+            using var kafkaConsumer = new ConsumerBuilder<string, byte[]>(config).Build();
             kafkaConsumer.Subscribe(topic);
             //TODO: melhorar
             while (true)

@@ -5,12 +5,12 @@ namespace MailMan.Core.Consumers
 {
     public interface IMailConsumer
     {
-        //TODO: Validar se é possível remover o object, e deixar como generics
-        public Task ExecuteAsync(string input, CancellationToken cancellationToken);
+        public Task ExecuteAsync(byte[] input, CancellationToken cancellationToken);
         public MailConsumerConfig GetConsumerConfig();
         public string GetTopic();
-        public Type GetInputType();
     }
+    //TODO: Provavelmente, o ideal seria criar uma nova classe que abrange o consumer e o producer. IMailDeliver.
+    //No momento, está assim pois até agora era apenas uma POC
     public class MailConsumer<TInput, TOutput> : IMailConsumer
     {
         private string Topic { get; set; } = string.Empty;
@@ -38,13 +38,14 @@ namespace MailMan.Core.Consumers
             Producer = producer;
         }
 
-        public async Task ExecuteAsync(string inputJson, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(byte[] inputBytes, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var input = JsonSerializer.Deserialize<TInput>(inputJson);
+            var input = JsonSerializer.Deserialize<TInput>(inputBytes);
 
-            if (input is not TInput)
+            if (input is null)
             {
+                //TOOD: Log warn
                 return;
             }
 
@@ -52,6 +53,7 @@ namespace MailMan.Core.Consumers
 
             if (!Producer.IsEmpty && output is not null)
             {
+
                 //TODO: Logar caso dê algo errado.
                 //TODO: Logar caso outptu seja nulo
                 await Producer.ProduceAsync(output, cancellationToken);
@@ -62,6 +64,5 @@ namespace MailMan.Core.Consumers
 
         public string GetTopic() => Topic;
 
-        public Type GetInputType() => typeof(TInput);
     }
 }

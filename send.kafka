@@ -1,9 +1,9 @@
 //wiki-information-accounts
 PRODUCER  
-topic:forum-information-accounts
+topic:wiki-information-accounts
 key: 1234
 {
-    "Name" : "John32_wikiforum",
+    "Name" : "John32_wikiforum_bytes_bolado_wiki_version",
     "Email": "John@gmail.com",
     "ForumName": "john_name_forum",
     "WikiName": "john_name2"

@@ -23,6 +23,11 @@ namespace MailMan.Core.Producers
 
         public async Task ProduceAsync(TOutput output, CancellationToken cancellationToken)
         {
+            //TODO: Configurar partition Key
+            if (string.IsNullOrEmpty(Topic))
+            {
+                //TODO: Log Warn
+            }
             cancellationToken.ThrowIfCancellationRequested();
 
             var messageAsJson = JsonSerializer.Serialize(output);
