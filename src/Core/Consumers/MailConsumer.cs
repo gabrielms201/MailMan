@@ -1,68 +1,69 @@
-﻿using MailMan.Core.Producers;
+﻿using Confluent.Kafka;
 using System.Text.Json;
 
 namespace MailMan.Core.Consumers
 {
-    public interface IMailConsumer
+    public interface IMailConsumer<TInput> : IDisposable
     {
-        public Task ExecuteAsync(byte[] input, CancellationToken cancellationToken);
-        public MailConsumerConfig GetConsumerConfig();
-        public string GetTopic();
+        public TInput ConsumeAndGetInput(CancellationToken cancellationToken);
     }
+
     //TODO: Provavelmente, o ideal seria criar uma nova classe que abrange o consumer e o producer. IMailDeliver.
     //No momento, está assim pois até agora era apenas uma POC
-    public class MailConsumer<TInput, TOutput> : IMailConsumer
+    public class MailConsumer<TInput> : IMailConsumer<TInput>, IDisposable
     {
         private string Topic { get; set; } = string.Empty;
         private string ConsumerGroup { get; set; } = string.Empty;
 
-        private Func<TInput, Task<TOutput>> Handler { get; set; }
         private MailConsumerConfig ConsumerConfig { get; set; } = MailConsumerConfig.Empty;
-        private MailProducer<TOutput> Producer { get; set; } = MailProducer<TOutput>.Empty;
+
+        private IConsumer<string, byte[]> Consumer { get; set; }
 
         public MailConsumer(
             string topic,
             string consumerGroup,
-            Func<TInput, Task<TOutput>> handler,
-            MailConsumerConfig consumerConfig,
-            MailProducer<TOutput> producer = null!)
+            MailConsumerConfig consumerConfig)
         {
             //TODO: Criar validador de config
             Topic = topic;
             ConsumerGroup = consumerGroup;
             ConsumerConfig = consumerConfig;
             ConsumerConfig.KafkaConfig.GroupId = ConsumerGroup;
-            Handler = handler;
 
-            producer ??= MailProducer<TOutput>.Empty;
-            Producer = producer;
+
+            Consumer = new ConsumerBuilder<string, byte[]>(ConsumerConfig.KafkaConfig).Build();
+            Consumer.Subscribe(Topic);
         }
 
-        public async Task ExecuteAsync(byte[] inputBytes, CancellationToken cancellationToken)
+        public TInput ConsumeAndGetInput(CancellationToken cancellationToken)
         {
+
             cancellationToken.ThrowIfCancellationRequested();
-            var input = JsonSerializer.Deserialize<TInput>(inputBytes);
+
+            var message = Consumer.Consume(cancellationToken);
+
+            //TODO: Adicionar suporte a open telemetry
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var input = JsonSerializer.Deserialize<TInput>(message.Message.Value);
 
             if (input is null)
             {
                 //TOOD: Log warn
-                return;
+                throw new InvalidOperationException("TODO:");
             }
 
-            var output = await Handler.Invoke(input);
-
-            if (!Producer.IsEmpty && output is not null)
-            {
-
-                //TODO: Logar caso dê algo errado.
-                //TODO: Logar caso outptu seja nulo
-                await Producer.ProduceAsync(output, cancellationToken);
-            }
+            return input;
         }
 
         public MailConsumerConfig GetConsumerConfig() => ConsumerConfig;
 
         public string GetTopic() => Topic;
 
+        public void Dispose()
+        {
+            //TODO: Fazer isso direito
+            Consumer!.Dispose();
+        }
     }
 }

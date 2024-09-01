@@ -1,15 +1,16 @@
 ﻿using MailMan.Core.Consumers;
+using MailMan.Core.Delivery;
 using System.Collections.Concurrent;
 
 namespace MailMan.Core.Configurator
 {
     public interface IMailConfigurator
     {
-        public ConcurrentBag<IMailConsumer> GetConsumers();
+        public ConcurrentBag<IMailDelivery> GetDeliveries();
     }
     public class MailConfigurator : IMailConfigurator
     {
-        private ConcurrentBag<IMailConsumer> _consumers = [];
+        private ConcurrentBag<IMailDelivery> _deliveries = [];
         private MailConsumerConfig _defaultConsumerConfig = MailConsumerConfig.Empty;
 
         public MailConfigurator HavingDefaultConsumerConfiguration(MailConsumerConfig config)
@@ -21,20 +22,20 @@ namespace MailMan.Core.Configurator
         }
 
         public MailConfigurator AddDeliver<TInput, TOutput>(
-            Action<MailConsumerConfigurator<TInput, TOutput>> config,
+            Action<MailDeliveryConfigurator<TInput, TOutput>> config,
             MailConsumerConfig kafkaConsumerConfig = null)
         {
             ArgumentNullException.ThrowIfNull(config);
 
-            var configurator = new MailConsumerConfigurator<TInput, TOutput>();
+            var configurator = new MailDeliveryConfigurator<TInput, TOutput>();
             config!.Invoke(configurator);
 
             kafkaConsumerConfig ??= _defaultConsumerConfig;
-            _consumers.Add(configurator.Build(kafkaConsumerConfig));
+            _deliveries.Add(configurator.Build(kafkaConsumerConfig));
             return this;
 
         }
 
-        public ConcurrentBag<IMailConsumer> GetConsumers() => _consumers;
+        public ConcurrentBag<IMailDelivery> GetDeliveries() => _deliveries;
     }
 }

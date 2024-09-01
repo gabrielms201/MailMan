@@ -6,15 +6,18 @@ namespace MailMan.Core.Service
     public class MailManHostedService : IHostedService,
         IAsyncDisposable
     {
-        public MailManHostedService(IConsumerManager consumerManager)
+        public MailManHostedService(IDeliveryManager consumerManager)
         {
-            _consumerManager = consumerManager;
+            _deliveryManager = consumerManager;
         }
 
-        public IConsumerManager _consumerManager { get; private set; }
+        public IDeliveryManager _deliveryManager { get; private set; }
 
         public async ValueTask DisposeAsync()
         {
+            //TODO: Implementar o dispose corretamente
+            _deliveryManager.Dispose();
+
             await Task.Delay(1);
             return;
             //throw new NotImplementedException();
@@ -22,14 +25,13 @@ namespace MailMan.Core.Service
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await _consumerManager.RunAsync(cancellationToken);
-            await Console.Out.WriteLineAsync("aa");
+            await _deliveryManager.RunAsync(cancellationToken);
             throw new NotImplementedException();
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            _deliveryManager.Dispose();
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace MailMan.Core.Manager
 {
-    public interface IConsumerManager
+    public interface IDeliveryManager : IDisposable
     {
         public Task RunAsync(CancellationToken cancellation);
     }

@@ -17,7 +17,7 @@ namespace MailMan.Installers.Extensions.DependencyInjection
             configure?.Invoke(configurator);
 
             services.AddSingleton<IMailConfigurator>(configurator);
-            services.AddSingleton<IConsumerManager, ConsumerManager>();
+            services.AddSingleton<IDeliveryManager, DeliveryManager>();
 
             AddHostedService(services);
             return services;
