@@ -6,7 +6,7 @@ namespace MailMan.Core.Producers
     public class MailProducerConfig
     {
         public static readonly MailProducerConfig Empty = new();
-        public bool IsNullOrEmpty => ReferenceEquals(this, Empty) || this is null;
+        public bool IsEmpty => ReferenceEquals(this, Empty);
         protected MailProducerConfig() { }
 
         public ProducerConfig KafkaConfig { get; private set; } = null!;

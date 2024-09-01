@@ -10,6 +10,8 @@ namespace MailMan.Core.Consumers
 
         public MailProducerConfig ProducerConfig = MailProducerConfig.Empty;
 
+        public string ProducerTopic { get; private set; }
+
         public MailConsumerConfigurator<TInput, TOutput> ConsumingKafkaTopic(string topic)
         {
             Topic = topic;
@@ -40,16 +42,17 @@ namespace MailMan.Core.Consumers
 
         public MailConsumerConfigurator<TInput, TOutput> ProducingToKafkaTopic(string topic, MailProducerConfig producerConfig = null)
         {
-            ProducerConfig = producerConfig;
+            ProducerConfig = producerConfig is null ? MailProducerConfig.Empty : producerConfig;
+            ProducerTopic = topic;
             return this;
         }
 
         public IMailConsumer Build(MailConsumerConfig config)
         {
-            if (ProducerConfig.IsNullOrEmpty)
+            if (ProducerConfig.IsEmpty)
                 ProducerConfig = MailProducerConfig.CreateFromConsumerConfig(config);
 
-            var producer = new MailProducer<TOutput>(ProducerConfig);
+            var producer = new MailProducer<TOutput>(ProducerTopic, ProducerConfig);
 
             //TODO: Ajustar para multi contrato
             //TODO: Ajustar definição de header

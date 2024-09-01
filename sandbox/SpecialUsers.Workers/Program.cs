@@ -29,12 +29,14 @@ public static class Program
                 .AddDeliver<WikiAccount, SpecialUser>(consumerA => consumerA
                     .ConsumingKafkaTopic("wiki-information-accounts")
                     .HavingConsumerGroup("special-users-workers")
-                        .WithHandler(wikiAccount => new(wikiAccount.Name, Origin: SpecialUser.OriginEnum.Wiki))
+                    .WithHandler(wikiAccount => new(wikiAccount.Name, Origin: SpecialUser.OriginEnum.Wiki))
+                    .ProducingToKafkaTopic("output-special-users")
                     )
                 .AddDeliver<ForumAccount, SpecialUser>(consumerB => consumerB
                     .ConsumingKafkaTopic("forum-information-accounts")
                     .HavingConsumerGroup("special-users-workers-forum")
-                        .WithHandler(AsyncHandler)
+                    .WithHandler(AsyncHandler)
+                    .ProducingToKafkaTopic("output-special-users")
             )
         );
     }
@@ -42,7 +44,7 @@ public static class Program
     public async static Task<SpecialUser> AsyncHandler(ForumAccount forumAccount)
     {
         await Task.Delay(10);
-        return new(forumAccount.Name, Origin: SpecialUser.OriginEnum.Wiki);
+        return new(forumAccount.Name, Origin: SpecialUser.OriginEnum.Forum);
     }
 
     static void ConfigureApplication(WebApplication app)
